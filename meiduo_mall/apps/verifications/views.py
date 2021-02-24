@@ -7,6 +7,7 @@ from django_redis import get_redis_connection
 
 from apps.verifications.libs.captcha.captcha import captcha
 from apps.verifications.libs.yuntongxun.send_sms import send_message
+from celery_tasks.sms.tasks import celery_send_sms
 
 
 class ImageCodes(View):
@@ -48,7 +49,8 @@ class SmsCodes(View):
             # 发送完成后设置一个60秒的过期值
             pl.setex(name=f'send_flag{mobile}', time=60, value=1)
             pl.execute()
-            send_message(mobile, sms_code)
+            celery_send_sms.delay(mobile, sms_code)
+            # send_message(mobile, sms_code)
             print(sms_code)
             return JsonResponse({'code': 0, 'errmsg': '短信验证码发送成功'})
         # 不相等返回错误信息

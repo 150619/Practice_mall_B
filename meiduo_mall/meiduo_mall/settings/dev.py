@@ -161,7 +161,7 @@ LOGGING = {
         'file': {  # 向文件中输出日志
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/meiduo_mall_logs.txt'),  # 日志文件的位置
+            'filename': os.path.join(BASE_DIR, 'logs/meiduo_mall_logs.log'),  # 日志文件的位置
             'maxBytes': 300 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'verbose'
