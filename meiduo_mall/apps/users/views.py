@@ -101,6 +101,14 @@ class Login(View):
         # 从数据库获取数据(返回的是QuerySet不方便做状态保持)
         # user = User.objects.filter(username=username, password=password)
 
+        # 判断用户输入的账号是否是手机号
+        if re.match(r'^1[3-9]\d{9}$', username):
+            # 将USERNAME_FIELD指定为mobile字段
+            User.USERNAME_FIELD = 'mobile'
+        else:
+            # 将USERNAME_FIELD指定为username字段
+            User.USERNAME_FIELD = 'username'
+
         # 验证用户名和密码
         user = authenticate(username=username, password=password)
 
