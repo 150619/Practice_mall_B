@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views import View
 from django_redis import get_redis_connection
 
+from apps.users.models import User
 from apps.verifications.libs.captcha.captcha import captcha
 from apps.verifications.libs.yuntongxun.send_sms import send_message
 from celery_tasks.sms.tasks import celery_send_sms
@@ -27,6 +28,10 @@ class SmsCodes(View):
         image_code_id = search_dict.get('image_code_id')
         if not all([image_code, image_code_id]):
             return JsonResponse({'code': 400, 'errmsg': '缺少必传参数'})
+        # 判断手机号是否存在
+        data = User.objects.filter(mobile=mobile)
+        if data:
+            return JsonResponse({'code': 400, 'errmsg': '手机号已存在'})
         redis_connect = get_redis_connection('verify_code')
         # 从redis数据库获取图形验证码
         b_real_image_code = redis_connect.get(f'code_{image_code_id}')
@@ -52,7 +57,7 @@ class SmsCodes(View):
             celery_send_sms.delay(mobile, sms_code)
             # send_message(mobile, sms_code)
             print(sms_code)
-            return JsonResponse({'code': 0, 'errmsg': '短信验证码发送成功'})
+            return JsonResponse({'code': 0, 'errmsg': 'ok'})
         # 不相等返回错误信息
         else:
             return JsonResponse({'code': 400, 'errmsg': '图形输入验证码错误'})

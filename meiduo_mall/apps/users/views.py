@@ -1,7 +1,7 @@
 import json
 import re
 
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.http import JsonResponse
 from django.views import View
 from django_redis import get_redis_connection
@@ -41,8 +41,8 @@ class Register(View):
         sms_code = json_dict.get('sms_code')
         # 获取allow
         allow = json_dict.get('allow')
-        # 判断必传参数是否全部存在
-        if not all([username, password, password2, mobile, sms_code, allow]):
+        # 判断必传参数是否全部存在,allow不用校验
+        if not all([username, password, password2, mobile, sms_code]):
             return JsonResponse({'code': '400', 'errmsg': '缺少必传参数'})
         # 判断username的格式
         if not re.match(r'[a-zA-Z0-9_-]{5,20}', username):
@@ -79,7 +79,37 @@ class Register(View):
         # 不为True返回错误码
         if not allow:
             return JsonResponse({'code': '400', 'errmsg': '请同意用户协议'})
-        # 将获取到的数据保存到数据库
-        user = User.objects.create(username=username, password=password, mobile=mobile)
+        # 将获取到的数据保存到数据库,直接使用create会导致authenticate无法认证,且密码是明文储存到数据库
+        # user = User.objects.create(username=username, password=password, mobile=mobile)
+        user = User.objects.create_user(username=username, password=password, mobile=mobile)
+        # 登录状态保持
         login(request, user)
-        return JsonResponse({'code': '0', 'errmsg': '注册成功'})
+        return JsonResponse({'code': '0', 'errmsg': 'ok'})
+
+
+class Login(View):
+    def post(self, request):
+        json_dict = json.loads(request.body)
+        # 获取参数
+        username = json_dict.get('username')
+        password = json_dict.get('password')
+        remembered = json_dict.get('remembered')
+        # 判断参数是否全部存在remembered不用校验
+        if not all([username, password]):
+            return JsonResponse({'code': 400, 'errmsg': '缺少必传参数'})
+
+        # 从数据库获取数据(返回的是QuerySet不方便做状态保持)
+        # user = User.objects.filter(username=username, password=password)
+
+        # 验证用户名和密码
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            return JsonResponse({'code': 400, 'errmsg': '用户名或密码错误'})
+        # 登录状态保持
+        login(request, user)
+        if remembered:
+            request.session.set_expiry(None)
+        else:
+            request.session.set_expiry(0)
+        return JsonResponse({'code': 0, 'errmsg': 'ok'})
