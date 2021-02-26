@@ -122,4 +122,7 @@ class Login(View):
             request.session.set_expiry(None)
         else:
             request.session.set_expiry(0)
-        return JsonResponse({'code': 0, 'errmsg': 'ok'})
+        # 后端设置cookie,前端获取cookie,使页面可以展示用户名
+        response = JsonResponse({'code': 0, 'errmsg': 'ok'})
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+        return response
