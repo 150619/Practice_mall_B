@@ -190,7 +190,7 @@ CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 AUTH_USER_MODEL = 'users.User'
 
 # 指定自定义的用户认证后端:
-# AUTHENTICATION_BACKENDS = ['apps.users.utils.UsernameMobileAuthBackend']
+AUTHENTICATION_BACKENDS = ['apps.users.utils.AuthMobile']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
