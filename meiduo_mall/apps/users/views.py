@@ -1,12 +1,13 @@
 import json
 import re
 
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.http import JsonResponse
 from django.views import View
 from django_redis import get_redis_connection
 
 from apps.users.models import User
+from apps.users.utils import LoginRequiredJsonMixin
 
 
 class RegisterName(View):
@@ -84,7 +85,9 @@ class Register(View):
         user = User.objects.create_user(username=username, password=password, mobile=mobile)
         # 登录状态保持
         login(request, user)
-        return JsonResponse({'code': '0', 'errmsg': 'ok'})
+        response = JsonResponse({'code': '0', 'errmsg': 'ok'})
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+        return response
 
 
 class Login(View):
@@ -126,3 +129,27 @@ class Login(View):
         response = JsonResponse({'code': 0, 'errmsg': 'ok'})
         response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
         return response
+
+
+class Logout(View):
+    def delete(self, request):
+        logout(request)
+        response = JsonResponse({'code': 0, 'errmsg': 'ok'})
+        response.delete_cookie('username')
+        return response
+
+
+class UserInfo(LoginRequiredJsonMixin, View):
+    def get(self, request):
+        # user是请求中认证出的用户对象
+        user = request.user
+        return JsonResponse({
+            'code': 0,
+            'errmsg': 'ok',
+            "info_data": {
+                "username": user.username,
+                "mobile": user.mobile,
+                "email": user.email,
+                # "email_active": user.email_active,
+            }
+        })

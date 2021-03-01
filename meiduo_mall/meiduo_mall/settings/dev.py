@@ -192,6 +192,8 @@ AUTH_USER_MODEL = 'users.User'
 # 指定自定义的用户认证后端:
 AUTHENTICATION_BACKENDS = ['apps.users.utils.AuthMobile']
 
+LOGIN_URL = '/login/'
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
