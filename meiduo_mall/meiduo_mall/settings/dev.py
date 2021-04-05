@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.3.8',  # 数据库主机
+        'HOST': '192.168.197.128',  # 数据库主机
         'PORT': 3306,  # 数据库端口
         'USER': 'root',  # 数据库用户名
         'PASSWORD': 'ainixiangni',  # 数据库用户密码
@@ -181,7 +181,7 @@ logger = logging.getLogger('django')
 # CORS跨域请求白名单设置
 CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:8080',
-    'http://192.168.3.8:8080',
+    'http://192.168.197.128:8080',
     'http://www.meiduo.site:8080',
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
